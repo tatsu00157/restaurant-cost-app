@@ -2,9 +2,7 @@
 
 import { useActionState, useEffect, useRef } from 'react'
 import { createIngredient, updateIngredient, type IngredientFormState } from '@/app/actions/ingredient'
-import type { Database } from '@/types/database'
-
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+import type { Ingredient } from '@/generated/prisma/client'
 
 type Props = {
   ingredient?: Ingredient
@@ -69,17 +67,17 @@ export default function IngredientForm({ ingredient, onClose }: Props) {
               type="number"
               min="0"
               step="0.01"
-              defaultValue={ingredient?.unit_price}
+              defaultValue={ingredient?.unitPrice}
               className="input"
               placeholder="例: 450"
             />
-            {state.errors?.unit_price && <Error messages={state.errors.unit_price} />}
+            {state.errors?.unitPrice && <Error messages={state.errors.unitPrice} />}
           </Field>
 
           <Field label="仕入れ先">
             <input
               name="supplier_name"
-              defaultValue={ingredient?.supplier_name ?? ''}
+              defaultValue={ingredient?.supplierName ?? ''}
               className="input"
               placeholder="例: ○○食品"
             />
@@ -91,7 +89,7 @@ export default function IngredientForm({ ingredient, onClose }: Props) {
               type="number"
               min="0"
               step="0.001"
-              defaultValue={ingredient?.stock_alert ?? ''}
+              defaultValue={ingredient?.stockAlert ?? ''}
               className="input"
               placeholder="この量を下回ったら通知"
             />

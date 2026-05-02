@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Store {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  members       StoreMember[]
+  ingredients   Ingredient[]
+  menus         Menu[]
+  inventory     Inventory[]
+  inventoryLogs InventoryLog[]
+  suppliers     Supplier[]
+  orders        Order[]
+  dailySales    DailySale[]
+
+  @@map("stores")
+}
+
+model StoreMember {
+  id        String   @id @default(cuid())
+  storeId   String   @map("store_id")
+  userId    String   @map("user_id")
+  role      String   @default("staff")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, userId])
+  @@map("store_members")
+}
+
+model Ingredient {
+  id           String   @id @default(cuid())
+  storeId      String   @map("store_id")
+  name         String
+  unit         String
+  unitPrice    Float    @default(0) @map("unit_price")
+  supplierName String?  @map("supplier_name")
+  stockAlert   Float?   @map("stock_alert")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  store           Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  menuIngredients MenuIngredient[]
+  inventory       Inventory[]
+  inventoryLogs   InventoryLog[]
+  orderItems      OrderItem[]
+
+  @@map("ingredients")
+}
+
+model Menu {
+  id           String   @id @default(cuid())
+  storeId      String   @map("store_id")
+  name         String
+  sellingPrice Float    @default(0) @map("selling_price")
+  category     String?
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  store           Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  menuIngredients MenuIngredient[]
+
+  @@map("menus")
+}
+
+model MenuIngredient {
+  id           String   @id @default(cuid())
+  menuId       String   @map("menu_id")
+  ingredientId String   @map("ingredient_id")
+  quantity     Float
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  menu       Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([menuId, ingredientId])
+  @@map("menu_ingredients")
+}
+
+model Inventory {
+  id           String   @id @default(cuid())
+  storeId      String   @map("store_id")
+  ingredientId String   @map("ingredient_id")
+  quantity     Float    @default(0)
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  store      Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, ingredientId])
+  @@map("inventory")
+}
+
+model InventoryLog {
+  id           String   @id @default(cuid())
+  storeId      String   @map("store_id")
+  ingredientId String   @map("ingredient_id")
+  quantity     Float
+  inputBy      String?  @map("input_by")
+  source       String   @default("web")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  store      Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@map("inventory_logs")
+}
+
+model Supplier {
+  id        String   @id @default(cuid())
+  storeId   String   @map("store_id")
+  name      String
+  contact   String?
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  store  Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@map("suppliers")
+}
+
+model Order {
+  id         String    @id @default(cuid())
+  storeId    String    @map("store_id")
+  supplierId String?   @map("supplier_id")
+  status     String    @default("draft")
+  orderedAt  DateTime? @map("ordered_at")
+  receivedAt DateTime? @map("received_at")
+  note       String?
+  createdBy  String?   @map("created_by")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  supplier   Supplier?   @relation(fields: [supplierId], references: [id])
+  orderItems OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String   @map("order_id")
+  ingredientId String   @map("ingredient_id")
+  quantity     Float
+  unitPrice    Float    @map("unit_price")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  order      Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+
+  @@map("order_items")
+}
+
+model DailySale {
+  id          String   @id @default(cuid())
+  storeId     String   @map("store_id")
+  date        DateTime
+  salesAmount Float    @default(0) @map("sales_amount")
+  laborCost   Float    @default(0) @map("labor_cost")
+  otherCost   Float    @default(0) @map("other_cost")
+  note        String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, date])
+  @@map("daily_sales")
+}

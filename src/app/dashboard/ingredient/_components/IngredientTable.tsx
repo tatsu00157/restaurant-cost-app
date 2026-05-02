@@ -3,9 +3,7 @@
 import { useState } from 'react'
 import { deleteIngredient } from '@/app/actions/ingredient'
 import IngredientForm from './IngredientForm'
-import type { Database } from '@/types/database'
-
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+import type { Ingredient } from '@/generated/prisma/client'
 
 export default function IngredientTable({ ingredients }: { ingredients: Ingredient[] }) {
   const [editing, setEditing] = useState<Ingredient | null>(null)
@@ -57,11 +55,11 @@ export default function IngredientTable({ ingredients }: { ingredients: Ingredie
                   <td className="px-4 py-3 font-medium text-gray-800">{ing.name}</td>
                   <td className="px-4 py-3 text-gray-600">{ing.unit}</td>
                   <td className="px-4 py-3 text-right text-gray-800">
-                    ¥{ing.unit_price.toLocaleString()}
+                    ¥{ing.unitPrice.toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{ing.supplier_name ?? '—'}</td>
+                  <td className="px-4 py-3 text-gray-600">{ing.supplierName ?? '—'}</td>
                   <td className="px-4 py-3 text-right text-gray-600">
-                    {ing.stock_alert != null ? `${ing.stock_alert} ${ing.unit}` : '—'}
+                    {ing.stockAlert != null ? `${ing.stockAlert} ${ing.unit}` : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-end">

@@ -1,22 +1,20 @@
-import { createAdminClient } from '@/lib/supabase/server'
-
-export const dynamic = 'force-dynamic'
+import { db } from '@/lib/db'
 import { getStoreId } from '@/lib/get-store-id'
 import IngredientTable from './_components/IngredientTable'
 
-export default async function IngredientPage() {
-  const supabase = createAdminClient()
-  const store_id = await getStoreId()
+export const dynamic = 'force-dynamic'
 
-  const { data: ingredients } = await supabase
-    .from('ingredients')
-    .select('*')
-    .eq('store_id', store_id)
-    .order('name')
+export default async function IngredientPage() {
+  const storeId = await getStoreId()
+
+  const ingredients = await db.ingredient.findMany({
+    where: { storeId },
+    orderBy: { name: 'asc' },
+  })
 
   return (
     <div className="p-8">
-      <IngredientTable ingredients={ingredients ?? []} />
+      <IngredientTable ingredients={ingredients} />
     </div>
   )
 }

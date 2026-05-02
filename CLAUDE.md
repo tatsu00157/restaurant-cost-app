@@ -18,10 +18,11 @@
 - [x] GitHubリポジトリ作成・初回プッシュ済み（https://github.com/tatsu00157/restaurant-cost-app.git）
 - [x] ダッシュボードレイアウト・サイドバー骨格
 - [x] ダッシュボードトップ（/dashboard）
-- [x] 食材マスタ管理ページ（/dashboard/ingredient）※現在Supabaseで動作中・SQLite移行予定
+- [x] Supabaseを全廃・PrismaによるSQLite移行完了
+- [x] 食材マスタ管理ページ（/dashboard/ingredient）
 
 ### 次にやること
-- [ ] **DBをSupabaseからSQLiteに移行**（アーキテクチャ変更）
+- [x] **DBをSupabaseからSQLiteに移行**（アーキテクチャ変更）
 - [ ] メニュー原価計算ページ（/dashboard/menu, /dashboard/menu/[id]）
 - [ ] 棚卸し管理ページ（/dashboard/inventory）
 - [ ] 発注管理ページ（/dashboard/order）
@@ -56,8 +57,8 @@
 | 役割 | 技術 | 状態 |
 |------|------|------|
 | フロントエンド | Next.js 16 (App Router)、TypeScript、Tailwind CSS | ✅ |
-| システムDB | SQLite（購入者ごとに1ファイル）+ Prisma or Drizzle | 移行予定 |
-| 認証用DB | Supabase Auth（販売サイトのログイン管理のみ） | ✅ 設定済み |
+| システムDB | SQLite（購入者ごとに1ファイル）+ Prisma 7 + libsql | ✅ |
+| 認証 | 販売サイト側で管理・このシステムはログインUI のみ | 最後に実装 |
 | バリデーション | Zod | ✅ |
 | 状態管理 | Zustand | ✅ |
 | セッション | jose | ✅ |
@@ -206,19 +207,16 @@ src/
 - ルート保護：`src/proxy.ts`
 - **ログイン機能は最後に実装する**
 
-### ⚠️ 開発中の一時対応（SQLite移行時に削除）
-- `src/lib/supabase/server.ts` に `createAdminClient()` を追加（SERVICE_ROLE_KEYでRLSをバイパス）
-- 各ページ・Server Actionsは現在 `createAdminClient()` を使用中
-- SQLite移行後は `createAdminClient()` ごと削除する
+### ⚠️ 開発中の一時対応（認証実装時に差し替え）
+- `src/lib/get-store-id.ts` が `DEV_STORE_ID` 環境変数を使用中
+- 認証実装後はセッションからユーザーIDを取得してstore_idを解決する形に差し替える
 
 ---
 
 ## 環境変数（.env.local）
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=        # 設定済み（認証用）
-NEXT_PUBLIC_SUPABASE_ANON_KEY=   # 設定済み（認証用）
-SUPABASE_SERVICE_ROLE_KEY=       # 設定済み（開発中のみ・移行後削除）
+DATABASE_URL=                    # 設定済み（SQLiteファイルパス）
 SESSION_SECRET=                  # 設定済み
 DEV_STORE_ID=                    # 設定済み（開発中のみ・認証実装後削除）
 LINE_CHANNEL_ACCESS_TOKEN=       # 未設定（LINE連携実装時に設定）
