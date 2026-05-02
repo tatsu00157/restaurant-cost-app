@@ -1,54 +1,64 @@
 export type UserRole = 'owner' | 'manager' | 'staff'
 export type OrderStatus = 'draft' | 'sent' | 'received' | 'cancelled'
 
+type Table<Row, Insert, Update> = {
+  Row: Row
+  Insert: Insert
+  Update: Update
+  Relationships: []
+}
+
 export interface Database {
+  __InternalSupabase: {
+    PostgrestVersion: '12'
+  }
   public: {
     Tables: {
-      stores: {
-        Row: {
+      stores: Table<
+        {
           id: string
           name: string
           owner_id: string
           created_at: string
-        }
-        Insert: {
+        },
+        {
           id?: string
           name: string
           owner_id: string
           created_at?: string
-        }
-        Update: {
+        },
+        {
           id?: string
           name?: string
           owner_id?: string
           created_at?: string
         }
-      }
-      store_members: {
-        Row: {
+      >
+      store_members: Table<
+        {
           id: string
           store_id: string
           user_id: string
           role: UserRole
           created_at: string
-        }
-        Insert: {
+        },
+        {
           id?: string
           store_id: string
           user_id: string
           role?: UserRole
           created_at?: string
-        }
-        Update: {
+        },
+        {
           id?: string
           store_id?: string
           user_id?: string
           role?: UserRole
           created_at?: string
         }
-      }
-      ingredients: {
-        Row: {
+      >
+      ingredients: Table<
+        {
           id: string
           store_id: string
           name: string
@@ -58,8 +68,8 @@ export interface Database {
           stock_alert: number | null
           created_at: string
           updated_at: string
-        }
-        Insert: {
+        },
+        {
           id?: string
           store_id: string
           name: string
@@ -69,8 +79,8 @@ export interface Database {
           stock_alert?: number | null
           created_at?: string
           updated_at?: string
-        }
-        Update: {
+        },
+        {
           id?: string
           store_id?: string
           name?: string
@@ -81,9 +91,9 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
-      }
-      menus: {
-        Row: {
+      >
+      menus: Table<
+        {
           id: string
           store_id: string
           name: string
@@ -92,8 +102,8 @@ export interface Database {
           is_active: boolean
           created_at: string
           updated_at: string
-        }
-        Insert: {
+        },
+        {
           id?: string
           store_id: string
           name: string
@@ -102,8 +112,8 @@ export interface Database {
           is_active?: boolean
           created_at?: string
           updated_at?: string
-        }
-        Update: {
+        },
+        {
           id?: string
           store_id?: string
           name?: string
@@ -113,55 +123,55 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
-      }
-      menu_ingredients: {
-        Row: {
+      >
+      menu_ingredients: Table<
+        {
           id: string
           menu_id: string
           ingredient_id: string
           quantity: number
           created_at: string
-        }
-        Insert: {
+        },
+        {
           id?: string
           menu_id: string
           ingredient_id: string
           quantity: number
           created_at?: string
-        }
-        Update: {
+        },
+        {
           id?: string
           menu_id?: string
           ingredient_id?: string
           quantity?: number
           created_at?: string
         }
-      }
-      inventory: {
-        Row: {
+      >
+      inventory: Table<
+        {
           id: string
           store_id: string
           ingredient_id: string
           quantity: number
           updated_at: string
-        }
-        Insert: {
+        },
+        {
           id?: string
           store_id: string
           ingredient_id: string
           quantity?: number
           updated_at?: string
-        }
-        Update: {
+        },
+        {
           id?: string
           store_id?: string
           ingredient_id?: string
           quantity?: number
           updated_at?: string
         }
-      }
-      inventory_logs: {
-        Row: {
+      >
+      inventory_logs: Table<
+        {
           id: string
           store_id: string
           ingredient_id: string
@@ -169,8 +179,8 @@ export interface Database {
           input_by: string | null
           source: string
           created_at: string
-        }
-        Insert: {
+        },
+        {
           id?: string
           store_id: string
           ingredient_id: string
@@ -178,8 +188,8 @@ export interface Database {
           input_by?: string | null
           source?: string
           created_at?: string
-        }
-        Update: {
+        },
+        {
           id?: string
           store_id?: string
           ingredient_id?: string
@@ -188,25 +198,25 @@ export interface Database {
           source?: string
           created_at?: string
         }
-      }
-      suppliers: {
-        Row: {
+      >
+      suppliers: Table<
+        {
           id: string
           store_id: string
           name: string
           contact: string | null
           note: string | null
           created_at: string
-        }
-        Insert: {
+        },
+        {
           id?: string
           store_id: string
           name: string
           contact?: string | null
           note?: string | null
           created_at?: string
-        }
-        Update: {
+        },
+        {
           id?: string
           store_id?: string
           name?: string
@@ -214,9 +224,9 @@ export interface Database {
           note?: string | null
           created_at?: string
         }
-      }
-      orders: {
-        Row: {
+      >
+      orders: Table<
+        {
           id: string
           store_id: string
           supplier_id: string | null
@@ -227,8 +237,8 @@ export interface Database {
           created_by: string | null
           created_at: string
           updated_at: string
-        }
-        Insert: {
+        },
+        {
           id?: string
           store_id: string
           supplier_id?: string | null
@@ -239,8 +249,8 @@ export interface Database {
           created_by?: string | null
           created_at?: string
           updated_at?: string
-        }
-        Update: {
+        },
+        {
           id?: string
           store_id?: string
           supplier_id?: string | null
@@ -252,25 +262,25 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
-      }
-      order_items: {
-        Row: {
+      >
+      order_items: Table<
+        {
           id: string
           order_id: string
           ingredient_id: string
           quantity: number
           unit_price: number
           created_at: string
-        }
-        Insert: {
+        },
+        {
           id?: string
           order_id: string
           ingredient_id: string
           quantity: number
           unit_price: number
           created_at?: string
-        }
-        Update: {
+        },
+        {
           id?: string
           order_id?: string
           ingredient_id?: string
@@ -278,9 +288,9 @@ export interface Database {
           unit_price?: number
           created_at?: string
         }
-      }
-      daily_sales: {
-        Row: {
+      >
+      daily_sales: Table<
+        {
           id: string
           store_id: string
           date: string
@@ -290,8 +300,8 @@ export interface Database {
           note: string | null
           created_at: string
           updated_at: string
-        }
-        Insert: {
+        },
+        {
           id?: string
           store_id: string
           date: string
@@ -301,8 +311,8 @@ export interface Database {
           note?: string | null
           created_at?: string
           updated_at?: string
-        }
-        Update: {
+        },
+        {
           id?: string
           store_id?: string
           date?: string
@@ -313,7 +323,9 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
-      }
+      >
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
   }
 }

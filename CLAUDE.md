@@ -26,7 +26,7 @@
 - [x] DB型定義（src/types/database.ts）
 - [x] ダッシュボードレイアウト・サイドバー骨格
 - [x] ダッシュボードトップ（/dashboard）
-- [ ] 食材マスタ管理ページ（/dashboard/ingredient）
+- [x] 食材マスタ管理ページ（/dashboard/ingredient）
 - [ ] メニュー原価計算ページ（/dashboard/menu, /dashboard/menu/[id]）
 - [ ] 棚卸し管理ページ（/dashboard/inventory）
 - [ ] 発注管理ページ（/dashboard/order）
@@ -133,7 +133,7 @@ src/
 | `/dashboard` | トップ（原価率・利益サマリー） | ✅ 骨格完了 |
 | `/dashboard/menu` | メニュー一覧・原価計算 | 未 |
 | `/dashboard/menu/[id]` | メニュー詳細・食材登録 | 未 |
-| `/dashboard/ingredient` | 食材マスタ管理 | 未 |
+| `/dashboard/ingredient` | 食材マスタ管理 | ✅ 完了 |
 | `/dashboard/inventory` | 棚卸し管理 | 未 |
 | `/dashboard/order` | 発注管理 | 未 |
 | `/dashboard/sales` | 売上・コスト分析 | 未 |
