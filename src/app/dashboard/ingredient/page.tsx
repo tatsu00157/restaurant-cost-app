@@ -1,9 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
+
+export const dynamic = 'force-dynamic'
 import { getStoreId } from '@/lib/get-store-id'
 import IngredientTable from './_components/IngredientTable'
 
 export default async function IngredientPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const store_id = await getStoreId()
 
   const { data: ingredients } = await supabase

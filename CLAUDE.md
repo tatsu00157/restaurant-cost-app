@@ -184,9 +184,10 @@ src/
 - **ログイン機能は最後に実装する**
 
 ### ⚠️ 開発中の一時対応（認証実装時に必ず戻すこと）
-- `src/lib/supabase/server.ts` のSupabaseクライアントが **`SUPABASE_SERVICE_ROLE_KEY`** を使用中
+- `src/lib/supabase/server.ts` に `createAdminClient()` を追加（SERVICE_ROLE_KEYでRLSをバイパス）
+- 各ページ・Server Actionsは現在 `createAdminClient()` を使用中
 - 理由：認証未実装のためRLSが`auth.uid() = null`となりデータアクセスがブロックされるため
-- **認証実装時に`NEXT_PUBLIC_SUPABASE_ANON_KEY`に戻す**（ファイル内にTODOコメントあり）
+- **認証実装時に全箇所を `createClient()` に置き換えて `createAdminClient()` を削除する**（ファイル内にTODOコメントあり）
 
 ---
 

@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { getStoreId } from '@/lib/get-store-id'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -40,7 +40,7 @@ export async function createIngredient(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const store_id = await getStoreId()
 
   const { error } = await supabase.from('ingredients').insert({
@@ -71,7 +71,7 @@ export async function updateIngredient(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const store_id = await getStoreId()
 
   const { error } = await supabase
@@ -87,7 +87,7 @@ export async function updateIngredient(
 }
 
 export async function deleteIngredient(id: string): Promise<void> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const store_id = await getStoreId()
 
   await supabase
