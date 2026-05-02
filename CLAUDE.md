@@ -183,6 +183,11 @@ src/
 - ルート保護：`src/proxy.ts`（Next.js 16では`middleware.ts`が廃止され`proxy.ts`に変更）
 - **ログイン機能は最後に実装する**
 
+### ⚠️ 開発中の一時対応（認証実装時に必ず戻すこと）
+- `src/lib/supabase/server.ts` のSupabaseクライアントが **`SUPABASE_SERVICE_ROLE_KEY`** を使用中
+- 理由：認証未実装のためRLSが`auth.uid() = null`となりデータアクセスがブロックされるため
+- **認証実装時に`NEXT_PUBLIC_SUPABASE_ANON_KEY`に戻す**（ファイル内にTODOコメントあり）
+
 ---
 
 ## 環境変数（.env.local）
