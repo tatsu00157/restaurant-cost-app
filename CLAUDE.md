@@ -14,19 +14,14 @@
 
 ### 完了済み
 - [x] プロジェクト概要・設計をCLAUDE.mdに整理
-- [x] 必要パッケージのインストール（@supabase/supabase-js, @supabase/ssr, zod, zustand, jose, server-only）
-- [x] フォルダ構成の作成（src/lib/, src/components/, src/types/, src/app/dashboard/ など）
-- [x] DBスキーマ作成（supabase/schema.sql）
-- [x] Supabaseプロジェクト作成・スキーマ実行済み
-- [x] .env.local に環境変数を設定済み（SUPABASE_URL, ANON_KEY, SERVICE_ROLE_KEY, SESSION_SECRET）
+- [x] フォルダ構成の作成
 - [x] GitHubリポジトリ作成・初回プッシュ済み（https://github.com/tatsu00157/restaurant-cost-app.git）
-
-### 次にやること（フェーズ3）
-- [x] Supabaseクライアント設定（src/lib/supabase/server.ts, client.ts）
-- [x] DB型定義（src/types/database.ts）
 - [x] ダッシュボードレイアウト・サイドバー骨格
 - [x] ダッシュボードトップ（/dashboard）
-- [x] 食材マスタ管理ページ（/dashboard/ingredient）
+- [x] 食材マスタ管理ページ（/dashboard/ingredient）※現在Supabaseで動作中・SQLite移行予定
+
+### 次にやること
+- [ ] **DBをSupabaseからSQLiteに移行**（アーキテクチャ変更）
 - [ ] メニュー原価計算ページ（/dashboard/menu, /dashboard/menu/[id]）
 - [ ] 棚卸し管理ページ（/dashboard/inventory）
 - [ ] 発注管理ページ（/dashboard/order）
@@ -58,22 +53,52 @@
 
 ## 技術スタック
 
-| 役割 | 技術 | インストール済み |
-|------|------|----------------|
+| 役割 | 技術 | 状態 |
+|------|------|------|
 | フロントエンド | Next.js 16 (App Router)、TypeScript、Tailwind CSS | ✅ |
-| データベース | Supabase (PostgreSQL) | ✅ |
-| 認証 | Supabase Auth | ✅ |
+| システムDB | SQLite（購入者ごとに1ファイル）+ Prisma or Drizzle | 移行予定 |
+| 認証用DB | Supabase Auth（販売サイトのログイン管理のみ） | ✅ 設定済み |
 | バリデーション | Zod | ✅ |
 | 状態管理 | Zustand | ✅ |
 | セッション | jose | ✅ |
 | LINE連携 | LINE Messaging API、@line/bot-sdk | 未 |
 | グラフ | Recharts | 未 |
 | PDF出力 | pdf-lib | 未 |
-| ホスティング | Vercel | 未 |
+| ホスティング | VPS（SQLiteのためVercelは使用不可） | 未 |
 
 ### Next.js 16 の注意点
 - `middleware.ts` は**廃止**。代わりに `src/proxy.ts` を使用する
 - ルート保護は `src/proxy.ts` に `proxy` 関数をエクスポートして実装する
+
+---
+
+## アーキテクチャ設計
+
+### DB構成
+- **Supabase**: 販売サイトのユーザー認証のみに使用
+  - 購入者のメール＋パスワード管理
+  - このシステムのデータは一切Supabaseに入れない
+- **SQLite**: システム本体のデータ管理
+  - 購入者1人につき1つの`.db`ファイルをVPS上に生成
+  - 外部サービスの制限に縛られない
+  - 1店舗あたり数MB程度なので容量の心配なし
+  - 複数プロジェクトを運営しても影響し合わない
+
+### ホスティング
+- VPS（メモリ1GB・CPU2コア・容量100GB）
+- 静的サイト・Python API等と同居
+- SQLiteはファイルベースのため軽量・同居に適している
+
+### 購入者ごとのDB分離フロー
+```
+販売サイトで購入完了
+  ↓
+VPS上に purchases/{user_id}.db を自動生成
+  ↓
+購入者がこのシステムにログイン（Supabase Auth認証）
+  ↓
+認証成功後、自分の.dbファイルに接続してシステムを使用
+```
 
 ---
 
@@ -85,7 +110,8 @@ src/
 │   ├── page.tsx                  # ログイン画面（最後に実装）
 │   ├── layout.tsx
 │   ├── actions/
-│   │   └── auth.ts               # ログイン・ログアウトServer Action（最後に実装）
+│   │   ├── auth.ts               # ログイン・ログアウトServer Action（最後に実装）
+│   │   └── ingredient.ts         # 食材CRUD
 │   └── dashboard/
 │       ├── layout.tsx            # ダッシュボード共通レイアウト
 │       ├── page.tsx              # トップ（原価率・利益サマリー）
@@ -104,8 +130,10 @@ src/
 │   └── ui/                       # 共通UIコンポーネント
 ├── lib/
 │   ├── supabase/
-│   │   ├── server.ts             # Supabaseサーバークライアント
-│   │   └── client.ts             # Supabaseブラウザクライアント
+│   │   ├── server.ts             # Supabaseクライアント（認証用）
+│   │   └── client.ts             # Supabaseブラウザクライアント（認証用）
+│   ├── db.ts                     # SQLiteクライアント（移行後に作成）
+│   ├── get-store-id.ts           # store_id取得ヘルパー（認証実装後に差し替え）
 │   ├── session.ts                # セッション暗号化・復号化（最後に実装）
 │   └── dal.ts                    # データアクセス層・認証確認（最後に実装）
 ├── types/
@@ -133,20 +161,18 @@ src/
 | `/dashboard` | トップ（原価率・利益サマリー） | ✅ 骨格完了 |
 | `/dashboard/menu` | メニュー一覧・原価計算 | 未 |
 | `/dashboard/menu/[id]` | メニュー詳細・食材登録 | 未 |
-| `/dashboard/ingredient` | 食材マスタ管理 | ✅ 完了 |
+| `/dashboard/ingredient` | 食材マスタ管理 | ✅ 完了（SQLite移行予定） |
 | `/dashboard/inventory` | 棚卸し管理 | 未 |
 | `/dashboard/order` | 発注管理 | 未 |
 | `/dashboard/sales` | 売上・コスト分析 | 未 |
 
 ---
 
-## DBスキーマ（supabase/schema.sql）
-
-### テーブル一覧
+## DBスキーマ（SQLite移行後も同じ構造）
 
 | テーブル | 概要 |
 |---------|------|
-| `stores` | 店舗（マルチテナント） |
+| `stores` | 店舗情報 |
 | `store_members` | 店舗ごとのユーザーロール |
 | `ingredients` | 食材マスタ |
 | `menus` | メニュー |
@@ -157,9 +183,6 @@ src/
 | `orders` | 発注 |
 | `order_items` | 発注明細 |
 | `daily_sales` | 日次売上 |
-
-- 全テーブルにRLS（Row Level Security）設定済み
-- `updated_at`自動更新トリガー設定済み
 
 ---
 
@@ -175,40 +198,32 @@ src/
 - ログイン成功 → `/dashboard` へリダイレクト
 - 未ログインで `/dashboard/*` へアクセス → `/` へリダイレクト
 - ログイン済みで `/` へアクセス → `/dashboard` へリダイレクト
-- **未登録メールアドレスでログイン試行 → リダイレクトなし、その場でエラーメッセージ表示**（「このメールアドレスは認証されていません」など）
+- **未登録メールアドレスでログイン試行 → リダイレクトなし、その場でエラーメッセージ表示**
 
 ### 実装方針
 - 認証：Supabase Auth（メール＋パスワード）
 - セッション：JWTをHTTP-onlyクッキーに保存（`jose`使用）
-- ルート保護：`src/proxy.ts`（Next.js 16では`middleware.ts`が廃止され`proxy.ts`に変更）
+- ルート保護：`src/proxy.ts`
 - **ログイン機能は最後に実装する**
 
-### ⚠️ 開発中の一時対応（認証実装時に必ず戻すこと）
+### ⚠️ 開発中の一時対応（SQLite移行時に削除）
 - `src/lib/supabase/server.ts` に `createAdminClient()` を追加（SERVICE_ROLE_KEYでRLSをバイパス）
 - 各ページ・Server Actionsは現在 `createAdminClient()` を使用中
-- 理由：認証未実装のためRLSが`auth.uid() = null`となりデータアクセスがブロックされるため
-- **認証実装時に全箇所を `createClient()` に置き換えて `createAdminClient()` を削除する**（ファイル内にTODOコメントあり）
+- SQLite移行後は `createAdminClient()` ごと削除する
 
 ---
 
 ## 環境変数（.env.local）
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=        # 設定済み
-NEXT_PUBLIC_SUPABASE_ANON_KEY=   # 設定済み
-SUPABASE_SERVICE_ROLE_KEY=       # 設定済み
+NEXT_PUBLIC_SUPABASE_URL=        # 設定済み（認証用）
+NEXT_PUBLIC_SUPABASE_ANON_KEY=   # 設定済み（認証用）
+SUPABASE_SERVICE_ROLE_KEY=       # 設定済み（開発中のみ・移行後削除）
 SESSION_SECRET=                  # 設定済み
+DEV_STORE_ID=                    # 設定済み（開発中のみ・認証実装後削除）
 LINE_CHANNEL_ACCESS_TOKEN=       # 未設定（LINE連携実装時に設定）
 LINE_CHANNEL_SECRET=             # 未設定（LINE連携実装時に設定）
 ```
-
----
-
-## マルチテナント設計
-
-- 全テーブルに `store_id` カラムを持たせる
-- 店舗ごとにデータを完全に分離する
-- RLS（Row Level Security）をSupabaseで設定し、他店舗のデータにはアクセス不可にする
 
 ---
 
@@ -221,7 +236,7 @@ LINE公式アカウント
   ↓ Webhook
 Next.js API (/api/line)
   ↓ データ保存・在庫更新
-Supabase
+SQLite（購入者のDBファイル）
   ↓ 在庫アラート or 発注提案を通知
 LINE公式アカウント
   ↓
