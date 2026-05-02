@@ -24,9 +24,13 @@ export default function IngredientForm({ ingredient, onClose }: Props) {
   )
 
   const formRef = useRef<HTMLFormElement>(null)
+  const wasSubmitting = useRef(false)
 
   useEffect(() => {
-    if (!pending && !state.errors && !state.message && formRef.current) {
+    if (pending) {
+      wasSubmitting.current = true
+    }
+    if (wasSubmitting.current && !pending && !state.errors && !state.message) {
       onClose()
     }
   }, [state, pending, onClose])
