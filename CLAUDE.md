@@ -22,15 +22,15 @@
 - [x] GitHubリポジトリ作成・初回プッシュ済み（https://github.com/tatsu00157/restaurant-cost-app.git）
 
 ### 次にやること（フェーズ3）
-- [ ] Supabaseクライアント設定（src/lib/supabase/server.ts, client.ts）
-- [ ] DB型定義（src/types/database.ts）
-- [ ] ダッシュボードレイアウト・サイドバー骨格
+- [x] Supabaseクライアント設定（src/lib/supabase/server.ts, client.ts）
+- [x] DB型定義（src/types/database.ts）
+- [x] ダッシュボードレイアウト・サイドバー骨格
+- [x] ダッシュボードトップ（/dashboard）
 - [ ] 食材マスタ管理ページ（/dashboard/ingredient）
 - [ ] メニュー原価計算ページ（/dashboard/menu, /dashboard/menu/[id]）
 - [ ] 棚卸し管理ページ（/dashboard/inventory）
 - [ ] 発注管理ページ（/dashboard/order）
 - [ ] 売上・コスト分析ページ（/dashboard/sales）
-- [ ] ダッシュボードトップ（/dashboard）
 
 ### 最後にやること（フェーズ4）
 - [ ] ログイン画面（/）
@@ -130,7 +130,7 @@ src/
 | パス | 内容 | 実装状況 |
 |------|------|---------|
 | `/` | ログイン（エントリーポイント） | 最後に実装 |
-| `/dashboard` | トップ（原価率・利益サマリー） | 未 |
+| `/dashboard` | トップ（原価率・利益サマリー） | ✅ 骨格完了 |
 | `/dashboard/menu` | メニュー一覧・原価計算 | 未 |
 | `/dashboard/menu/[id]` | メニュー詳細・食材登録 | 未 |
 | `/dashboard/ingredient` | 食材マスタ管理 | 未 |
