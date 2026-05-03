@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { ReactNode } from 'react'
-import { logout } from '@/app/actions/auth'
 
 const navItems = [
   { href: '/dashboard', label: 'ダッシュボード', icon: '📊' },
@@ -34,11 +33,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <div className="p-4 border-t border-gray-200">
-          <form action={logout}>
-            <button type="submit" className="w-full text-sm text-gray-500 hover:text-gray-700 py-2">
-              ログアウト
-            </button>
-          </form>
+          <button className="w-full text-sm text-gray-500 hover:text-gray-700 py-2">
+            ログアウト
+          </button>
         </div>
       </aside>
 

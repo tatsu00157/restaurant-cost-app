@@ -1,11 +1,6 @@
-import { getSession } from '@/lib/session'
-import { redirect } from 'next/navigation'
 import LoginForm from './_components/LoginForm'
 
-export default async function LoginPage() {
-  const session = await getSession()
-  if (session) redirect('/dashboard')
-
+export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="bg-white rounded-xl shadow-lg w-full max-w-sm p-8">
