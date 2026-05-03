@@ -1,50 +1,48 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { changePassword } from '@/app/actions/changePassword'
 
 type State = { error?: string; success?: boolean } | undefined
+
+function PasswordInput({ name, label, autoComplete }: { name: string; label: string; autoComplete: string }) {
+  const [show, setShow] = useState(false)
+  return (
+    <div>
+      <label className="block text-sm text-gray-900 mb-1">{label}</label>
+      <div className="relative">
+        <input
+          name={name}
+          type={show ? 'text' : 'password'}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+          autoComplete={autoComplete}
+        />
+        <button
+          type="button"
+          onClick={() => setShow(v => !v)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"
+        >
+          {show ? '非表示' : '表示'}
+        </button>
+      </div>
+    </div>
+  )
+}
 
 export default function SettingsPage() {
   const [state, action, isPending] = useActionState<State, FormData>(changePassword, undefined)
 
   return (
     <div className="p-8 max-w-md">
-      <h1 className="text-xl font-bold text-gray-800 mb-6">設定</h1>
+      <h1 className="text-xl font-bold text-gray-900 mb-6">設定</h1>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-sm font-semibold text-gray-700 mb-4">パスワード変更</h2>
+        <h2 className="text-sm font-semibold text-gray-900 mb-4">パスワード変更</h2>
 
         <form action={action} className="space-y-4">
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">現在のパスワード</label>
-            <input
-              name="currentPassword"
-              type="password"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoComplete="current-password"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">新しいパスワード（8文字以上）</label>
-            <input
-              name="newPassword"
-              type="password"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoComplete="new-password"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">新しいパスワード（確認）</label>
-            <input
-              name="confirmPassword"
-              type="password"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoComplete="new-password"
-            />
-          </div>
+          <PasswordInput name="currentPassword" label="現在のパスワード" autoComplete="current-password" />
+          <PasswordInput name="newPassword" label="新しいパスワード（8文字以上）" autoComplete="new-password" />
+          <PasswordInput name="confirmPassword" label="新しいパスワード（確認）" autoComplete="new-password" />
 
           {state?.error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">

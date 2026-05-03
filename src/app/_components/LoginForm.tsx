@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { login } from '@/app/actions/auth'
 
 type State = { error?: string } | undefined
@@ -11,12 +11,13 @@ type Props = {
 
 export default function LoginForm({ error: initialError }: Props) {
   const [state, action, isPending] = useActionState<State, FormData>(login, undefined)
+  const [showPassword, setShowPassword] = useState(false)
   const errorMessage = state?.error ?? initialError
 
   return (
     <form action={action} className="space-y-4">
       <div>
-        <label className="block text-sm text-gray-700 mb-1">メールアドレス</label>
+        <label className="block text-sm text-gray-900 mb-1">メールアドレス</label>
         <input
           name="email"
           type="email"
@@ -27,14 +28,23 @@ export default function LoginForm({ error: initialError }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm text-gray-700 mb-1">パスワード</label>
-        <input
-          name="password"
-          type="password"
-          className="input"
-          placeholder="••••••••"
-          autoComplete="current-password"
-        />
+        <label className="block text-sm text-gray-900 mb-1">パスワード</label>
+        <div className="relative">
+          <input
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            className="input pr-10"
+            placeholder="••••••••"
+            autoComplete="current-password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(v => !v)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"
+          >
+            {showPassword ? '非表示' : '表示'}
+          </button>
+        </div>
       </div>
 
       {errorMessage && (

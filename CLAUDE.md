@@ -35,7 +35,8 @@
 - [x] ログイン画面（/）— 販売サイトの `/api/auth/system-login` を呼びJWTをsessionクッキーに保存
 - [x] ログアウト（src/app/actions/logout.ts）— sessionクッキー削除 → /にリダイレクト
 - [x] ルート保護（src/proxy.ts）— sessionクッキーの有無で/dashboard/*を保護
-- [x] 設定ページ（/dashboard/settings）— パスワード変更機能
+- [x] 設定ページ（/dashboard/settings）— パスワード変更機能（パスワード表示切替付き）
+- [x] ログインフォームにパスワード表示切替ボタン追加
 
 ---
 
