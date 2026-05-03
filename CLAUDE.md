@@ -32,10 +32,10 @@
 - [x] 売上・コスト分析ページ（/dashboard/sales）
 
 ### 最後にやること（フェーズ4）
-- [ ] ログイン画面（/）
-- [ ] セッション管理（src/lib/session.ts）
-- [ ] ルート保護（src/proxy.ts）
-- [ ] DAL（src/lib/dal.ts）
+- [x] ログイン画面（/）
+- [x] セッション管理（src/lib/session.ts）
+- [x] ルート保護（src/proxy.ts）
+- [x] DAL（src/lib/dal.ts）
 
 ---
 
@@ -186,7 +186,7 @@ src/
 
 | パス | 内容 | 実装状況 |
 |------|------|---------|
-| `/` | ログイン（エントリーポイント） | 最後に実装 |
+| `/` | ログイン（エントリーポイント） | ✅ 完了 |
 | `/dashboard` | トップ（原価率・利益サマリー） | ✅ 骨格完了 |
 | `/dashboard/menu` | メニュー一覧・原価計算 | ✅ 完了 |
 | `/dashboard/menu/[id]` | メニュー詳細・食材登録 | ✅ 完了 |
@@ -245,9 +245,10 @@ src/
 
 ```env
 DATABASE_URL=                    # 設定済み（SQLiteファイルパス・開発用）
-SESSION_SECRET=                  # 設定済み
-API_SECRET_KEY=                  # 設定済み（販売サイト側にも同じ値を設定すること）
+SESSION_SECRET=                  # 設定済み（チャットに出さない・漏洩時はopenssl rand -base64 32で再生成）
+API_SECRET_KEY=                  # 設定済み（販売サイト側にも同じ値を設定すること・チャットに出さない）
 DEV_STORE_ID=                    # 設定済み（開発中のみ・認証実装後削除）
+SALES_SITE_URL=                  # 設定済み（開発中はhttp://localhost:3001、本番はVPSのURLに変更）
 LINE_CHANNEL_ACCESS_TOKEN=       # 未設定（LINE連携実装時に設定）
 LINE_CHANNEL_SECRET=             # 未設定（LINE連携実装時に設定）
 ```
