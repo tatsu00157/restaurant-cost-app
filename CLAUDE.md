@@ -27,9 +27,9 @@
 - [x] **DBをSupabaseからSQLiteに移行**（アーキテクチャ変更）
 - [x] 購入者DB自動生成API（/api/users/create）
 - [x] メニュー原価計算ページ（/dashboard/menu, /dashboard/menu/[id]）
-- [ ] 棚卸し管理ページ（/dashboard/inventory）
-- [ ] 発注管理ページ（/dashboard/order）
-- [ ] 売上・コスト分析ページ（/dashboard/sales）
+- [x] 棚卸し管理ページ（/dashboard/inventory）
+- [x] 発注管理ページ（/dashboard/order）
+- [x] 売上・コスト分析ページ（/dashboard/sales）
 
 ### 最後にやること（フェーズ4）
 - [ ] ログイン画面（/）
@@ -191,9 +191,9 @@ src/
 | `/dashboard/menu` | メニュー一覧・原価計算 | ✅ 完了 |
 | `/dashboard/menu/[id]` | メニュー詳細・食材登録 | ✅ 完了 |
 | `/dashboard/ingredient` | 食材マスタ管理 | ✅ 完了（SQLite移行予定） |
-| `/dashboard/inventory` | 棚卸し管理 | 未 |
-| `/dashboard/order` | 発注管理 | 未 |
-| `/dashboard/sales` | 売上・コスト分析 | 未 |
+| `/dashboard/inventory` | 棚卸し管理 | ✅ 完了 |
+| `/dashboard/order` | 発注管理 | ✅ 完了 |
+| `/dashboard/sales` | 売上・コスト分析 | ✅ 完了 |
 
 ---
 
