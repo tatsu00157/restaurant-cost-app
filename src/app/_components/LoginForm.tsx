@@ -1,6 +1,10 @@
 'use client'
 
-export default function LoginForm() {
+type Props = {
+  error?: string
+}
+
+export default function LoginForm({ error }: Props) {
   return (
     <form className="space-y-4">
       <div>
@@ -24,6 +28,12 @@ export default function LoginForm() {
           autoComplete="current-password"
         />
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
 
       <button
         type="submit"
