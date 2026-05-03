@@ -274,34 +274,74 @@ LINE公式アカウント
 
 ## 販売サイトとの連携
 
+### 販売サイト概要（/Users/Karinadmin/Dev/Web/my-shop）
+
+| 項目 | 内容 |
+|------|------|
+| フレームワーク | Next.js 16 + TypeScript |
+| 認証 | NextAuth（メール+パスワードのみ。GoogleOAuthは管理者自身のみ） |
+| DB | Supabase（PostgreSQL） |
+| 決済 | Stripe（Webhook で購入完了を検知） |
+| メール | Resend |
+| パスワード | bcryptjs でハッシュ化（salt rounds: 12） |
+
 ### 前提
 - このシステムをVPSにデプロイしてから連携できる（ローカル開発中は不可）
-- `API_SECRET_KEY` を販売サイト側の環境変数にも同じ値を設定する（`.env.local`を直接確認すること・チャットに出さない）
+- `API_SECRET_KEY` を販売サイト側の環境変数にも同じ値を設定する（値はチャットに出さず `.env.local` を直接確認すること）
+- 販売サイト側にも `RESTAURANT_APP_API_KEY`（= このシステムの `API_SECRET_KEY`）と `RESTAURANT_APP_URL` を環境変数として追加する
 
-### 連携手順（購入完了時）
-
-販売サイトの購入完了処理から以下のAPIを叩く：
+### 連携フロー全体
 
 ```
-POST https://[このシステムのドメイン]/api/users/create
-Headers:
-  x-api-key: [API_SECRET_KEYの値]
-  Content-Type: application/json
-Body:
-  { "email": "購入者のメールアドレス" }
+1. 購入者が販売サイトでメール+パスワードで会員登録・購入
+      ↓
+2. Stripe Webhook（checkout.session.completed）
+      ↓
+3. 販売サイト /app/api/webhooks/stripe/route.ts に追加：
+   POST このシステム/api/users/create { email }
+      ↓
+4. user_XXXX.db が自動生成される
+      ↓
+5. 購入完了メールにこのシステムのログインURLを記載（sendAccessGrantedEmail に追記）
+      ↓
+6. 購入者がこのシステムの / にアクセスしてメール+パスワードを入力
+      ↓
+7. このシステムが 販売サイト/api/auth/verify を呼んでパスワード検証
+      ↓
+8. 検証OK → JWTセッション発行 → /dashboard へ
 ```
 
-レスポンス例：
-```json
-{ "userNumber": "0001", "created": true }
+### 販売サイト側に追加実装が必要なもの（デプロイ後）
+
+#### ① Stripe Webhook に `/api/users/create` 呼び出しを追加
+- ファイル: `/app/api/webhooks/stripe/route.ts`
+- `checkout.session.completed` イベント処理内に追記
+- 対象商品（restaurant-cost-app の productId）のみ呼ぶ条件分岐を入れる
+
+#### ② 認証確認APIエンドポイントを新規追加
+- ファイル: `/app/api/auth/verify/route.ts`（新規作成）
+- メソッド: POST
+- 認証: `x-api-key` ヘッダーで保護
+- 処理: Supabase の `users` テーブルから email でユーザー取得 → bcrypt でパスワード検証
+- レスポンス: `{ ok: true }` or `{ ok: false }`
+
+```ts
+// リクエスト
+POST /api/auth/verify
+Headers: x-api-key: [API_SECRET_KEYの値]
+Body: { "email": "...", "password": "..." }
+
+// レスポンス
+{ "ok": true }  // 認証成功
+{ "ok": false } // メールなし or パスワード不一致
 ```
 
-- `created: false` の場合はすでに登録済み（重複購入などでも安全）
-- このAPIを叩くことで購入者のDBファイル（`user_XXXX.db`）が自動生成される
-
-### ログインURLの案内（ログイン実装後）
-
-購入完了メール等に `https://[このシステムのドメイン]/` へのリンクを記載し、購入者が自分でログインする流れになる。
+### このシステム側のログイン実装方針（フェーズ4）
+- `/` のログインフォームでメール+パスワードを受け取る
+- `registry.json` に登録済みか確認（未登録 → 「ご購入をお確かめください」エラー）
+- 登録済み → 販売サイトの `/api/auth/verify` を呼んでパスワード検証
+- 検証OK → `jose` でJWT生成 → HTTP-onlyクッキーに保存 → `/dashboard` へ
+- 検証NG → その場でエラーメッセージ表示（リダイレクトなし）
 
 ---
 
