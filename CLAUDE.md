@@ -32,8 +32,10 @@
 - [x] 売上・コスト分析ページ（/dashboard/sales）
 
 ### 最後にやること（フェーズ4）
-- [x] ログイン画面（/）— UIのみ。認証ロジックは販売サイト側で実装する
+- [x] ログイン画面（/）— 販売サイトの `/api/auth/system-login` を呼びJWTをsessionクッキーに保存
+- [x] ログアウト（src/app/actions/logout.ts）— sessionクッキー削除 → /にリダイレクト
 - [x] ルート保護（src/proxy.ts）— sessionクッキーの有無で/dashboard/*を保護
+- [x] 設定ページ（/dashboard/settings）— パスワード変更機能
 
 ---
 
@@ -184,7 +186,7 @@ src/
 
 | パス | 内容 | 実装状況 |
 |------|------|---------|
-| `/` | ログイン（エントリーポイント） | ✅ 完了（UIのみ・エラー表示付き） |
+| `/` | ログイン（エントリーポイント） | ✅ 完了 |
 | `/dashboard` | トップ（原価率・利益サマリー） | ✅ 完了（実データ接続済み） |
 | `/dashboard/menu` | メニュー一覧・原価計算 | ✅ 完了 |
 | `/dashboard/menu/[id]` | メニュー詳細・食材登録 | ✅ 完了 |
@@ -192,6 +194,7 @@ src/
 | `/dashboard/inventory` | 棚卸し管理 | ✅ 完了 |
 | `/dashboard/order` | 発注管理 | ✅ 完了 |
 | `/dashboard/sales` | 売上・コスト分析 | ✅ 完了 |
+| `/dashboard/settings` | 設定（パスワード変更） | ✅ 完了 |
 
 ---
 
@@ -335,15 +338,21 @@ Body: { "email": "...", "password": "..." }
 { "ok": false } // メールなし or パスワード不一致
 ```
 
-### このシステム側のログイン実装方針
-- `/` にログインUIのみ用意（メール+パスワードの入力フォーム）
-- 認証ロジック（purchasesテーブルとの照合・セッション発行）は販売サイト側で実装する
-- このシステムは認証済みユーザーが使うダッシュボード部分のみ担当
+### ログイン・認証フロー（確定版）
+1. ユーザーが `/` でメール+パスワードを入力
+2. `src/app/actions/auth.ts` が販売サイトの `POST /api/auth/system-login` を呼ぶ
+3. 販売サイトが `purchases` テーブルでメールアドレスを照合・パスワード検証
+4. 成功 → JWTトークンを返す → このシステムが `session` クッキーにセット（30日・httpOnly）
+5. `/dashboard` へリダイレクト
+6. `src/proxy.ts` が `session` クッキーの有無でルート保護
 
-### ログインエラー表示
-販売サイト側が認証失敗時に以下のURLへリダイレクトすることでエラーを表示する：
-- `/?error=invalid` → 「メールアドレスまたはパスワードが正しくありません。ご購入がお済みでない場合は、販売サイトよりご購入ください。」
-- `/?error=unauthorized` → 「このメールアドレスは登録されていません。ご購入後にご利用いただけます。」
+### パスワード変更フロー
+- `/dashboard/settings` でパスワード変更
+- `src/app/actions/changePassword.ts` がセッションからメールを取得し販売サイトの `POST /api/auth/change-password` を呼ぶ
+
+### 販売サイト側に必要なエンドポイント（連携済み）
+- `POST /api/auth/system-login` — purchasesテーブル照合・JWT発行
+- `POST /api/auth/change-password` — パスワード変更処理
 
 ---
 
