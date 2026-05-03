@@ -23,7 +23,8 @@
 
 ### 次にやること
 - [x] **DBをSupabaseからSQLiteに移行**（アーキテクチャ変更）
-- [ ] メニュー原価計算ページ（/dashboard/menu, /dashboard/menu/[id]）
+- [x] 購入者DB自動生成API（/api/users/create）
+- [x] メニュー原価計算ページ（/dashboard/menu, /dashboard/menu/[id]）
 - [ ] 棚卸し管理ページ（/dashboard/inventory）
 - [ ] 発注管理ページ（/dashboard/order）
 - [ ] 売上・コスト分析ページ（/dashboard/sales）
@@ -108,12 +109,23 @@ prisma/data/
 ```
 販売サイトで購入完了
   ↓
-次の連番（例: user_0001.db）を自動採番してVPS上に生成
+POST /api/users/create  { email }  ※ x-api-key ヘッダー必須
+  ↓
+src/lib/registry.ts が連番採番（prisma/data/registry.json を更新）
+  ↓
+user_XXXX.db を生成してマイグレーションSQL実行
   ↓
 購入者がこのシステムにログイン
   ↓
 認証成功後、自分の user_XXXX.db に接続してシステムを使用
 ```
+
+### /api/users/create の仕様
+- **メソッド**: POST
+- **認証**: `x-api-key` ヘッダーに `API_SECRET_KEY` を付与（販売サイト・このシステム双方に同じ値を設定）
+- **リクエストボディ**: `{ "email": "user@example.com" }`
+- **レスポンス**: `{ "userNumber": "0001", "created": true }`
+- すでに登録済みのメールは再生成せず既存の番号を返す
 
 ---
 
@@ -174,8 +186,8 @@ src/
 |------|------|---------|
 | `/` | ログイン（エントリーポイント） | 最後に実装 |
 | `/dashboard` | トップ（原価率・利益サマリー） | ✅ 骨格完了 |
-| `/dashboard/menu` | メニュー一覧・原価計算 | 未 |
-| `/dashboard/menu/[id]` | メニュー詳細・食材登録 | 未 |
+| `/dashboard/menu` | メニュー一覧・原価計算 | ✅ 完了 |
+| `/dashboard/menu/[id]` | メニュー詳細・食材登録 | ✅ 完了 |
 | `/dashboard/ingredient` | 食材マスタ管理 | ✅ 完了（SQLite移行予定） |
 | `/dashboard/inventory` | 棚卸し管理 | 未 |
 | `/dashboard/order` | 発注管理 | 未 |
@@ -230,8 +242,9 @@ src/
 ## 環境変数（.env.local）
 
 ```env
-DATABASE_URL=                    # 設定済み（SQLiteファイルパス）
+DATABASE_URL=                    # 設定済み（SQLiteファイルパス・開発用）
 SESSION_SECRET=                  # 設定済み
+API_SECRET_KEY=                  # 設定済み（販売サイト側にも同じ値を設定すること）
 DEV_STORE_ID=                    # 設定済み（開発中のみ・認証実装後削除）
 LINE_CHANNEL_ACCESS_TOKEN=       # 未設定（LINE連携実装時に設定）
 LINE_CHANNEL_SECRET=             # 未設定（LINE連携実装時に設定）
