@@ -19,7 +19,7 @@
 - [x] フォルダ構成の作成
 - [x] GitHubリポジトリ作成・初回プッシュ済み（https://github.com/tatsu00157/restaurant-cost-app.git）
 - [x] ダッシュボードレイアウト・サイドバー骨格
-- [x] ダッシュボードトップ（/dashboard）
+- [x] ダッシュボードトップ（/dashboard）実データ接続済み
 - [x] Supabaseを全廃・PrismaによるSQLite移行完了
 - [x] 食材マスタ管理ページ（/dashboard/ingredient）
 
